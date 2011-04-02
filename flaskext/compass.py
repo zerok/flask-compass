@@ -30,24 +30,27 @@ class Compass(object):
         self.debug_only= self.app.config.get('COMPASS_REQUESTCHECK_DEBUG_ONLY', True)
         self.compile()
         if not self.debug_only or self.app.debug:
-            self.app.after_request(self.compile)
+            self.app.after_request(self.after_request)
 
-    def compile(self, response=None):
+    def compile(self):
         """
         Main entry point that compiles all the specified or found compass
         projects.
         """
-        if response is not None and request is not None:
-            # When used as response processor, only run if we are requesting anything
-            # but a static resource.
-            if request.endpoint in [None, "static"]:
-                return response
         self._check_configs()
         for cfgfile, cfg in self.configs.iteritems():
             cfg.parse()
             if cfg.changes_found():
                 self.log.debug("Changes found for " + cfg.path + ". Compiling...")
                 cfg.compile(self)
+
+    def after_request(self, response):
+        if response is not None and request is not None:
+            # When used as response processor, only run if we are requesting anything
+            # but a static resource.
+            if request.endpoint in [None, "static"]:
+                return response
+        self.compile()
         return response
 
     def _check_configs(self):
@@ -106,7 +109,11 @@ class CompassConfig(object):
             warnings.warn("src directory not found!")
         if self.src is None or self.dest is None:
             return False
-        return os.path.getmtime(self.src) > os.path.getmtime(self.dest)
+        dest_mtime = -1
+        src_mtime = os.path.getmtime(self.src)
+        if os.path.exists(self.dest):
+            dest_mtime = os.path.getmtime(self.dest)
+        return src_mtime >= dest_mtime
 
     def compile(self, compass):
         subprocess.call([compass.compass_path, 'compile'], cwd=self.base_dir)
