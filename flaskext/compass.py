@@ -167,6 +167,8 @@ class CompassConfig(object):
         Calls the compass script specified in the compass extension
         with the paths provided by the config.rb.
         """
-        subprocess.call([compass.compass_path, 'compile'], cwd=self.base_dir)
+        output = subprocess.check_output([compass.compass_path, 'compile', '-q'], cwd=self.base_dir)
         os.utime(self.dest, None)
+        compass.log.trace(output)
+
 
