@@ -8,6 +8,15 @@ especially to help during the development process.
 The extension scans the project's directory for Compass configuration files
 in order to compile the associated Compass project.
 
+
+Note that you need to have compass installed before being able to use this
+extension.
+
+Links
+-----
+
+* `Documentation <http://packages.python.org/Flask-Compass>`_
+
 .. _compass: http://compass-style.org/
 
 """
