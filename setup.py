@@ -8,6 +8,8 @@ especially to help during the development process.
 The extension scans the project's directory for Compass configuration files
 in order to compile the associated Compass project.
 
+.. _compass: http://compass-style.org/
+
 """
 from setuptools import setup
 
