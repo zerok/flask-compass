@@ -1,3 +1,14 @@
+"""
+Flask-Compass
+=============
+
+Flask-Compass provides a simple integration of Compass_ into Flask applications
+especially to help during the development process.
+
+The extension scans the project's directory for Compass configuration files
+in order to compile the associated Compass project.
+
+"""
 from setuptools import setup
 
 version = '0.1'
