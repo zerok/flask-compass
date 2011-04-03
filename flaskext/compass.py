@@ -28,6 +28,7 @@ class Compass(object):
         self.compass_path = self.app.config.get('COMPASS_PATH', 'compass')
         self.config_files = self.app.config.get('COMPASS_CONFIGS', None)
         self.debug_only= self.app.config.get('COMPASS_REQUESTCHECK_DEBUG_ONLY', True)
+        self.skip_mtime_check = self.app.config.get('COMPASS_SKIP_MTIME_CHECK', False)
         self.compile()
         if not self.debug_only or self.app.debug:
             self.app.after_request(self.after_request)
@@ -40,8 +41,8 @@ class Compass(object):
         self._check_configs()
         for cfgfile, cfg in self.configs.iteritems():
             cfg.parse()
-            if cfg.changes_found():
-                self.log.debug("Changes found for " + cfg.path + ". Compiling...")
+            if cfg.changes_found() or self.skip_mtime_check:
+                self.log.debug("Changes found for " + cfg.path + " or checks disabled. Compiling...")
                 cfg.compile(self)
 
     def after_request(self, response):
