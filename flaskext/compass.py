@@ -169,6 +169,6 @@ class CompassConfig(object):
         """
         output = subprocess.check_output([compass.compass_path, 'compile', '-q'], cwd=self.base_dir)
         os.utime(self.dest, None)
-        compass.log.trace(output)
+        compass.log.debug(output)
 
 
