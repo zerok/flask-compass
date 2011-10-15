@@ -35,6 +35,15 @@ whole process will be done with each request.
 This behaviour as well as where the extension looks for your config files can
 be configured as detailed in the next chapter.
 
+Versions
+========
+
+0.2:
+    More logging and better error handling if compass can't be found.
+
+0.1:
+    Initial release
+
 .. _compass: http://compass-style.org/
 
 .. toctree::
