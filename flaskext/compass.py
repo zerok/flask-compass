@@ -7,6 +7,7 @@ import subprocess
 import re
 import time
 import warnings
+import errno
 from flask import request
 
 
@@ -32,6 +33,7 @@ class Compass(object):
         self.debug_only = None
         self.skip_mtime_check = None
         self.compass_path = None
+        self.disabled = False
         if self.app is not None:
             self.init_app(self.app)
 
@@ -51,6 +53,7 @@ class Compass(object):
                 'COMPASS_SKIP_MTIME_CHECK', False)
         self.debug_only = self.app.config.get(
                 'COMPASS_DEBUG_ONLY', False)
+        self.disabled = self.app.config.get('COMPASS_DISABLED', False)
 
         if not self.debug_only:
             self.compile()
@@ -63,6 +66,8 @@ class Compass(object):
         Main entry point that compiles all the specified or found compass
         projects.
         """
+        if self.disabled:
+            return
         self._check_configs()
         for _, cfg in self.configs.iteritems():
             cfg.parse()
@@ -167,8 +172,17 @@ class CompassConfig(object):
         Calls the compass script specified in the compass extension
         with the paths provided by the config.rb.
         """
-        output = subprocess.check_output([compass.compass_path, 'compile', '-q'], cwd=self.base_dir)
-        os.utime(self.dest, None)
-        compass.log.debug(output)
-
-
+        try:
+            output = subprocess.check_output(
+                    [compass.compass_path, 'compile', '-q'],
+                    cwd=self.base_dir)
+            os.utime(self.dest, None)
+            compass.log.debug(output)
+        except OSError, e:
+            if e.errno == errno.ENOENT:
+                compass.log.error("Compass could not be found in the PATH " +
+                    "and/or in the COMPASS_PATH setting! " +
+                    "Disabling compilation.")
+                compass.disabled = True
+            else:
+                raise e
