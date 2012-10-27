@@ -9,7 +9,7 @@ import time
 import warnings
 import errno
 from flask import request
-
+import fnmatch
 
 CONFIG_LINE_RE = re.compile(ur'^\s*?(\S+)\s*?=\s*(.*)\s*$')
 
@@ -165,7 +165,16 @@ class CompassConfig(object):
         src_mtime = os.path.getmtime(self.src)
         if os.path.exists(self.dest):
             dest_mtime = os.path.getmtime(self.dest)
-        return src_mtime >= dest_mtime
+
+        if src_mtime >= dest_mtime:
+            return True # changes found
+
+        for folder, _, files in os.walk(self.src):
+            for filename in fnmatch.filter(files, '*.scss'):
+                src_path = os.path.join(folder, filename)
+                if os.path.getmtime(src_path) >= dest_mtime:
+                    return True 
+        return False
 
     def compile(self, compass):
         """
